@@ -1,0 +1,21 @@
+'
+<!DOCTYPE html>\n<html lang="">\n
+
+<head>\n
+    <meta charset="utf-8" />\n
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n <title>Wargaming.net ID</title>\n \n
+    <script
+        type="text/javascript">\n        var onLoad = function () {
+            \n            var authRedirectForm = document.auth_redirect_form, \n                createInputElement = function (name, value) {
+            \n                    var input = document.createElement(\'input\');\n                    input.setAttribute(\'type\', \'hidden\');\n                    input.setAttribute(\'name\', name);\n                    input.setAttribute(\'value\', value);\n                    authRedirectForm.appendChild(input);\n
+}; \n\n            createInputElement(\'next_url_authentication_required\', true);\n\n            if (document.location.hash) {\n
+  var nextUrlInput = document.getElementsByName(\'next\');\n                if (nextUrlInput.length !== 0) {\n                    nextUrlInput[0].value = nextUrlInput[0].value + document.location.hash;\n                } else {\n                    createInputElement(\'next\', document.location.pathname + document.location.hash);\n                }\n            }\n\n            authRedirectForm.submit();\n        };\n    </script>
+    \n\n</head>\n
+
+<body onload="onLoad()">\n \n <form name="auth_redirect_form"
+        action="https://clans.worldofwarships.com/clans/auth/oid/verify/" method="post">\n <input type="hidden"
+            name="csrfmiddlewaretoken" value="OlIyfLJ04zICeNly4YIrCvsix2NlwP7R">\n \n
+        <input name="next" type="hidden" value="/clans/wows/ladder/api/battles/?team=1" />\n \n <noscript>\n \n
+            <input type="submit" value="Confirm" />\n </noscript>\n </form>\n\n</body>\n
+
+</html>\n'

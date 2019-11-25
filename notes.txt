@@ -1,0 +1,9 @@
+MVP:
+1. Open browser with selenium
+2. Take you to WG to login
+3. Have it wait for input in cosole for when ready to proceed
+4. Once ready, fetch data: 
+alpha rating : https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=1
+bravo rating: https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=2
+5. Parse and format data to get following info:
+,,Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Mk,St,Wo,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,YY,X,,486,Points
