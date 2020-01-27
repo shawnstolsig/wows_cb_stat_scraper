@@ -14,24 +14,24 @@ import re
 import pickle
 
 # # # # open Firefox (with Selenium)
-driver = webdriver.Firefox()
-driver.get("https://worldofwarships.com/")
+# driver = webdriver.Firefox()
+# driver.get("https://worldofwarships.com/")
 
-# # # wait until user to login (later, replace this with homebrew OpenID connection)
-input("Press enter once logged into WG...")
+# # # # wait until user to login (later, replace this with homebrew OpenID connection)
+# input("Press enter once logged into WG...")
 
-# # # once user is logged in the browser, 
-driver.get('https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=1')
+# # # # once user is logged in the browser, 
+# driver.get('https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=1')
 
-input("Save file in same folder, using 'data1' for alpha.  Press enter when done.")
+# input("Save file in same folder, using 'data1' for alpha.  Press enter when done.")
 
-driver.get('https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=2')
+# driver.get('https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=2')
 
-input("Save file in same folder, using 'data2' for bravo.  Press enter when done. ")
+# input("Save file in same folder, using 'data2' for bravo.  Press enter when done. ")
 
 # some variables we'll need later
 # create string for writing to CSV
-csv_string = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Mk,St,Wo,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,YY,X,,486,Points\n"
+csv_string = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Mk,St,Wo,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,YY,X,,0,Points\n"
 # create dictionary for ship indexes:
 # ship_index_table = {
 #     'Yamato': 10,
