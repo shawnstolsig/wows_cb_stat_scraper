@@ -1,10 +1,41 @@
 import json
-import re
 import os
 from datetime import datetime, timedelta
 
-# update both ship_index_table and csv_string headers whenever new ships added
-ship_index_table = {
+# update session ids for each new season
+SESSION_IDS = {
+    '22/1': '1.1',
+    '23/1': '1.2',
+    '25/1': '1.3',
+    '26/1': '1.4',
+    '29/1': '2.1',
+    '30/1': '2.2',
+    '1/2': '2.3',
+    '2/2': '2.4',
+    '5/2': '3.1',
+    '6/2': '3.2',
+    '8/2': '3.3',
+    '9/2': '3.4',
+    '12/2': '4.1',
+    '13/2': '4.2',
+    '15/2': '4.3',
+    '16/2': '4.4',
+    '19/2': '5.1',
+    '20/2': '5.2',
+    '22/2': '5.3',
+    '23/2': '5.4',
+    '26/2': '6.1',
+    '27/2': '6.2',
+    '29/2': '6.3',
+    '1/3': '6.4',
+    '4/3': '7.1',
+    '5/3': '7.2',
+    '7/3': '7.3',
+    '8/3': '7.4',
+}
+
+# update both SHIP_INDEX_TABLE and csv_string headers whenever new ships added
+SHIP_INDEX_TABLE = {
     'Yamato': 0,
     'Montana': 1,
     'Ohio': 2,
@@ -43,25 +74,7 @@ ship_index_table = {
     'Paolo Emilio': 35,
     'Yueyang': 36
 }
-csv_string = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Mk,St,Wo,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,YY,X,,0,Points\n"
-
-# update session ids for each new season
-session_ids = {
-    '22/1': '1.1',
-    '23/1': '1.2',
-    '25/1': '1.3',
-    '26/1': '1.4',
-    '22/1': '2.1',
-    '22/1': '2.2',
-    '22/1': '2.3',
-    '22/1': '2.4',
-    '22/1': '.1',
-    '22/1': '.2',
-    '22/1': '.3',
-    '22/1': '.4',
-
-}
-
+CSV_STRING = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Mk,St,Wo,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,YY,X,,0,Points\n"
 
 # get a list of all json files in working directory
 def get_json_files():
@@ -128,14 +141,6 @@ def translate_battle_data(battle, csv_string):
     date_time_obj_local = date_time_obj_utc - timedelta(days=1)
     date_time = f'{date_time_obj_local.day}/{date_time_obj_local.month}'
 
-
-    # regex = f'(\d+-\d+)[A-Z]' # put regex expression in here
-    # date_time = re.search(regex, date_time)[0]
-    # date_time = date_time[:len(date_time)-1]
-
-
-
-
     # convert 0 point battles to "S" for struggle
     if rating_delta == 0:
         rating_delta = 'S'
@@ -154,7 +159,7 @@ def translate_battle_data(battle, csv_string):
 
     # create list of zeros to help track counts.  abbreviateint "sl" for "ship_list"
     sl = []
-    for k in range(len(ship_index_table)):
+    for k in range(len(SHIP_INDEX_TABLE)):
         sl.append(0)
 
     # record enemy ships
@@ -165,7 +170,7 @@ def translate_battle_data(battle, csv_string):
 
         # strip off rental ship brackets
         this_ship = this_ship.strip('[]')
-        sl[ship_index_table[this_ship]] += 1
+        sl[SHIP_INDEX_TABLE[this_ship]] += 1
 
     # remove zeroes
     for x in range(len(sl)):
@@ -173,7 +178,7 @@ def translate_battle_data(battle, csv_string):
             sl[x] = ''
 
     # add battle as line in csv string
-    csv_string += f"{date_time},,{own_clan_tag},{own_clan_rating},{opponent_tag},,{map_name},,{sl[0]},{sl[1]},{sl[2]},{sl[3]},{sl[4]},{sl[5]},{sl[6]},{sl[7]},{sl[8]},{sl[9]},{sl[10]},{sl[11]},{sl[12]},{sl[13]},{sl[14]},{sl[15]},{sl[16]},{sl[17]},{sl[18]},{sl[19]},{sl[20]},{sl[21]},{sl[22]},{sl[23]},{sl[24]},{sl[25]},{sl[26]},{sl[27]},{sl[28]},{sl[29]},{sl[30]},{sl[31]},{sl[32]},{sl[33]},{sl[34]},{sl[35]},{sl[36]},,,{result},{rating_delta}\n"
+    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},manbear67's script,{map_name},,{sl[0]},{sl[1]},{sl[2]},{sl[3]},{sl[4]},{sl[5]},{sl[6]},{sl[7]},{sl[8]},{sl[9]},{sl[10]},{sl[11]},{sl[12]},{sl[13]},{sl[14]},{sl[15]},{sl[16]},{sl[17]},{sl[18]},{sl[19]},{sl[20]},{sl[21]},{sl[22]},{sl[23]},{sl[24]},{sl[25]},{sl[26]},{sl[27]},{sl[28]},{sl[29]},{sl[30]},{sl[31]},{sl[32]},{sl[33]},{sl[34]},{sl[35]},{sl[36]},,,{result},{rating_delta}\n"
 
     return csv_string
 
@@ -192,8 +197,8 @@ battle_list = load_battle_data(get_json_files())
 battle_list = sorted(battle_list, key = lambda b: b['finished_at'] )
 
 for battle in battle_list:
-    csv_string = translate_battle_data(battle, csv_string)
+    CSV_STRING = translate_battle_data(battle, CSV_STRING)
 
-write_string_to_csv(csv_string)
+write_string_to_csv(CSV_STRING)
 
 print("Finished.")
