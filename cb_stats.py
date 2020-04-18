@@ -1,6 +1,7 @@
 import json
 import os
-from datetime import datetime, timedelta
+import pytz
+from datetime import datetime, timedelta, timezone
 
 # update session ids for each new season
 SESSION_IDS = {
@@ -138,6 +139,11 @@ def load_battle_data(json_files):
     print(f'Unique battles: {len(unordered_battle_list)}')
     return unordered_battle_list
 
+
+# a function for converting from utc to local time
+def utc_to_local(utc_dt):
+    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+
 # given a battle object, update the string to be written as a csv
 def translate_battle_data(battle, csv_string):
 
@@ -152,16 +158,14 @@ def translate_battle_data(battle, csv_string):
 
     # convert date....NEED TO FIX THE DAY/TIMEZONE
     date_time_obj_utc = datetime.fromisoformat(date_time_iso)
-    date_time_obj_local = date_time_obj_utc - timedelta(days=1)
+    # date_time_obj_local = date_time_obj_utc.replace(tzinfo=pytz.timezone('US/Eastern'))
+    date_time_obj_local = date_time_obj_utc.astimezone(pytz.timezone('US/Eastern'))
     date_time = f'{date_time_obj_local.day}/{date_time_obj_local.month}'
-    
-    data_time_obj_new_local = datetime.fromtimestamp(float(date_time_iso)
 
-    print(f'date_time_iso: {date_time_iso}')
-    print(f'data_time_obj_new_local: {data_time_obj_new_local}')
-    print(f'date_time_obj_utc: {date_time_obj_utc}')
-    print(f'date_time_obj_local: {date_time_obj_local}')
-    print(f'date_time: {date_time}')
+    # print(f'date_time_iso: {date_time_iso}')
+    # print(f'date_time_obj_utc: {date_time_obj_utc} with type {type(date_time_obj_utc)} timezone:{date_time_obj_utc.tzinfo}')
+    # print(f'date_time_obj_local: {date_time_obj_local} with type {type(date_time_obj_local)} timezone:{date_time_obj_local.tzinfo}')
+    # print(f'date_time: {date_time}')
 
     # convert 0 point battles to "S" for struggle
     if rating_delta == 0:
@@ -200,7 +204,7 @@ def translate_battle_data(battle, csv_string):
             sl[x] = ''
 
     # add battle as line in csv string
-    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},script,{map_name},,{sl[0]},{sl[1]},{sl[2]},{sl[3]},{sl[4]},{sl[5]},{sl[6]},{sl[7]},{sl[8]},{sl[9]},{sl[10]},{sl[11]},{sl[12]},{sl[13]},{sl[14]},{sl[15]},{sl[16]},{sl[17]},{sl[18]},{sl[19]},{sl[20]},{sl[21]},{sl[22]},{sl[23]},{sl[24]},{sl[25]},{sl[26]},{sl[27]},{sl[28]},{sl[29]},{sl[30]},{sl[31]},{sl[32]},{sl[33]},{sl[34]},{sl[35]},{sl[36]},,,{result},{rating_delta}\n"
+    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},script,{map_name},,{sl[0]},{sl[1]},{sl[2]},{sl[3]},{sl[4]},{sl[5]},{sl[6]},{sl[7]},{sl[8]},{sl[9]},{sl[10]},{sl[11]},{sl[12]},{sl[13]},{sl[14]},{sl[15]},{sl[16]},{sl[17]},{sl[18]},{sl[19]},{sl[20]},{sl[21]},{sl[22]},{sl[23]},{sl[24]},{sl[25]},{sl[26]},{sl[27]},{sl[28]},{sl[29]},{sl[30]},{sl[31]},{sl[32]},{sl[33]},{sl[34]},{sl[35]},{sl[36]},{sl[37]},{sl[38]},{sl[39]},{sl[40]},{sl[41]},{sl[42]},{sl[43]},{sl[44]},{sl[45]},{sl[46]},,,{result},{rating_delta}\n"
 
     return csv_string
 
