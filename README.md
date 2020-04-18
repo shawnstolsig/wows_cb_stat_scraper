@@ -23,7 +23,7 @@ Optionally, you can build to a single-file executable using pyinstaller.  After 
 pyinstaller cb_stats.py -F --icon=logo.ico
 
 ### Other
-JSON files can be optained from links below.  Note that you must be first be authenticated through the World of Warships website for these links to work.  Also, they will only return the 50 most recent battles played, per rating. 
+JSON files can be obtained from links below.  Note that you must be first be authenticated through the World of Warships website for these links to work.  Also, they will only return the 50 most recent battles played, per rating. 
 
 Alpha: https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=1
 
