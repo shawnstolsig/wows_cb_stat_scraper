@@ -5,7 +5,9 @@ Note that the main file of interest here is cb_stats.py.
 
 ### Dependencies:
 Python 3.8
+
 Built in packages: datetime, json, os
+
 External packages: pytz
 
 
