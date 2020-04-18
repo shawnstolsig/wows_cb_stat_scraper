@@ -1,0 +1,3 @@
+Here are some sample json files for testing the script.
+
+NOTE that only current season json will work with the script.  You will get key errors when attempting to run previous season data through the script because the session ids have been updated for current season dates.

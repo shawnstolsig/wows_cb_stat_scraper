@@ -1,8 +1,35 @@
+'''
+'   Purpose of this script is to convert json files containing clan battle results into a csv spreadsheet. 
+'   When executed, the script will read any json files contained in the same directory as this file, 
+'   store all battles as objects, convert each battle object to a comma seperated string, and finally output to a 
+'   csv file called "clan_battle_results.csv."  The script will prevent duplicate battles (based of the battle ID 
+'   assigned by WG) so any number of json files can be processed at once.  
+'   
+'   The input JSON files can be obtained at the following URLs, after you authenticate on the World of Warships website:
+'   Alpha Rating (team 1): https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=1
+'   Bravo Rating (team 2): https://clans.worldofwarships.com/clans/wows/ladder/api/battles/?team=2
+'
+'   The format of the csv output is based on torino2dc's KSD/KSC/KSE Clan Wars Google sheet.  
+'
+'   To maintain, this file will need to be updated with new ships and date/session pairs before each season.
+'   The global variables SESSION_IDS, SHIP_INDEX_TABLE, and CSV_STRING are the only things that need to be updated.
+'
+'   The script is current configured for Season 9.  This means tier X ships with dates/sessions ranging from 
+'   April 15, 2020 to June 7, 2020.
+'
+'   Issues/future ideas: 
+'   1. Read in ships and session id/date pairs from file so that this code does not need to be modified between seasons.
+'   2. Even better...read in ships/clan battle season info from WG's API instead of external file.
+'   3. Rather than relying on torino2dc's template, create a more generic output that could be used by other clans.
+'
+'''
+
 import json
 import os
 import pytz
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
+#########################      global vars      ##########################################
 # update session ids for each new season
 SESSION_IDS = {
     '15/4': '1.1',
@@ -39,7 +66,7 @@ SESSION_IDS = {
     '7/6': '8.4',
 }
 
-# update both SHIP_INDEX_TABLE and csv_string headers whenever new ships added
+# update both SHIP_INDEX_TABLE and CSV_STRING whenever new ships added
 SHIP_INDEX_TABLE = {
     'Yamato': 0,
     'Shikishima': 1,
@@ -91,29 +118,50 @@ SHIP_INDEX_TABLE = {
 }
 CSV_STRING = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Sk,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Pp,Mk,St,Wo,Nv,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,Hd,Sd,YY,Hk,Md,FR,MR,Au,X,,0,Points\n"
 
+
+#########################      functions      ############################################
 # get a list of all json files in working directory
 def get_json_files():
+    '''
+    '   Returns a list of json filenames in the current directory. 
+    '   Arguments: none    Return: list of strings
+    '''
+
+    # get current working directory
     location = os.getcwd()
+
+    # declare empty list
     json_files = []
 
+    # for each file in current directory
     for file in os.listdir(location):
         try: 
+            # append to file list if it's a json file
             if file.endswith(".json"):
                 json_files.append(str(file))
+        # edge case: no json files found
         except Exception as e: 
-            raise e
             print("No files found")
+            raise e
 
     print(f"Loading data from {len(json_files)} json files.")
     return json_files
 
 # given a list of json files, return an unordered list of unique battle dictionaries
 def load_battle_data(json_files):
+    '''
+    '   Generate an unordered list of unique battle objects(dictionaries) based off json files.
+    '   Arguments: a list of strings representing json filenames   Return: Unordered list of battle objects
+    '''
+
+    # create empty lists
     battle_id_list = []
     unordered_battle_list = []
+
+    # create counter for console message
     battle_counter = 0
 
-    # loop through all data##.json files, where ## is 1 to 99
+    # loop through all json files
     for json_file in json_files:
 
         # try to open file and process input.  
@@ -123,6 +171,8 @@ def load_battle_data(json_files):
 
             # loop through json data and push only battles that don't currently exist...prevent duplicates
             for battle in data:
+
+                # total battle counter...represents all battles in the input json files
                 battle_counter += 1
 
                 # if battle not already in battle list, update lists
@@ -139,13 +189,12 @@ def load_battle_data(json_files):
     print(f'Unique battles: {len(unordered_battle_list)}')
     return unordered_battle_list
 
-
-# a function for converting from utc to local time
-def utc_to_local(utc_dt):
-    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
-
 # given a battle object, update the string to be written as a csv
 def translate_battle_data(battle, csv_string):
+    '''
+    '   Converts battle object to a single row to be later written to a CSV
+    '   Arguments: battle object and string to be printed to csv    Return: updated comma seperated string with battle data appended
+    '''
 
     # get data from JSON
     date_time_iso = battle['finished_at'] 
@@ -156,16 +205,10 @@ def translate_battle_data(battle, csv_string):
     map_name = battle['map']['name']
     result = battle['teams'][0]['result']
 
-    # convert date....NEED TO FIX THE DAY/TIMEZONE
+    # convert date from UTC timestamp to "DD/MM" format.  uses datetime and pytz libraries.
     date_time_obj_utc = datetime.fromisoformat(date_time_iso)
-    # date_time_obj_local = date_time_obj_utc.replace(tzinfo=pytz.timezone('US/Eastern'))
     date_time_obj_local = date_time_obj_utc.astimezone(pytz.timezone('US/Eastern'))
     date_time = f'{date_time_obj_local.day}/{date_time_obj_local.month}'
-
-    # print(f'date_time_iso: {date_time_iso}')
-    # print(f'date_time_obj_utc: {date_time_obj_utc} with type {type(date_time_obj_utc)} timezone:{date_time_obj_utc.tzinfo}')
-    # print(f'date_time_obj_local: {date_time_obj_local} with type {type(date_time_obj_local)} timezone:{date_time_obj_local.tzinfo}')
-    # print(f'date_time: {date_time}')
 
     # convert 0 point battles to "S" for struggle
     if rating_delta == 0:
@@ -177,54 +220,69 @@ def translate_battle_data(battle, csv_string):
     elif result == "victory":
         result = "W"
 
-    # convert team number to 'A' or "B"
+    # convert team number to 'A' or "B" ("team number" represents alpha or bravo rating)
     if own_clan_rating == 1:
         own_clan_rating = 'A'
     elif own_clan_rating == 2:
         own_clan_rating = 'B'
 
-    # create list of zeros to help track counts.  abbreviateint "sl" for "ship_list"
-    sl = []
+    # create list of zeros to help track counts. 
+    ship_counts = []
     for k in range(len(SHIP_INDEX_TABLE)):
-        sl.append(0)
+        ship_counts.append(0)
 
     # record enemy ships
     for j in range(len(battle['teams'][1]['players'])):
 
-        # get ship string
+        # get ship name string
         this_ship = battle['teams'][1]['players'][j]['ship']['name']
 
-        # strip off rental ship brackets
+        # strip off rental ship brackets...rental ships and tech tree ships counted the same
         this_ship = this_ship.strip('[]')
-        sl[SHIP_INDEX_TABLE[this_ship]] += 1
 
-    # remove zeroes
-    for x in range(len(sl)):
-        if sl[x] == 0:
-            sl[x] = ''
+        # increment count of current ship
+        ship_counts[SHIP_INDEX_TABLE[this_ship]] += 1
+
+    # remove zeroes from ship_count list 
+    for x in range(len(ship_counts)):
+        if ship_counts[x] == 0:
+            ship_counts[x] = ''
 
     # add battle as line in csv string
-    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},script,{map_name},,{sl[0]},{sl[1]},{sl[2]},{sl[3]},{sl[4]},{sl[5]},{sl[6]},{sl[7]},{sl[8]},{sl[9]},{sl[10]},{sl[11]},{sl[12]},{sl[13]},{sl[14]},{sl[15]},{sl[16]},{sl[17]},{sl[18]},{sl[19]},{sl[20]},{sl[21]},{sl[22]},{sl[23]},{sl[24]},{sl[25]},{sl[26]},{sl[27]},{sl[28]},{sl[29]},{sl[30]},{sl[31]},{sl[32]},{sl[33]},{sl[34]},{sl[35]},{sl[36]},{sl[37]},{sl[38]},{sl[39]},{sl[40]},{sl[41]},{sl[42]},{sl[43]},{sl[44]},{sl[45]},{sl[46]},,,{result},{rating_delta}\n"
+    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},(formula),{map_name},script,"
+    for ship in ship_counts:
+            csv_string += f'{ship},'
+    csv_string += f",,{result},{rating_delta}\n"
 
     return csv_string
 
 # write csv_string to csv file
 def write_string_to_csv(input_string):
+    '''
+    '   Write the csv string built by the script to a csv file
+    '   Arguments: comma seperated string      Returns: none (but csv is written to cwd)
+    '''
 
     print("Writing to clan_battles_results.csv...")
 
     with open("clan_battles_results.csv", "w") as output:
         output.write(input_string)
 
-######################### main ##########################################
+
+#########################      main      #################################################
 print("Script starting...")
 
+# create list of battle objects, taking in cwd json filenames
 battle_list = load_battle_data(get_json_files())
+
+# sort battle list by time battle finished (so most recent will be at bottom of csv)
 battle_list = sorted(battle_list, key = lambda b: b['finished_at'] )
 
+# convert battle objects into csv string.  note that csv_string is overwritten each loop.  
 for battle in battle_list:
     CSV_STRING = translate_battle_data(battle, CSV_STRING)
 
+# write csv string to csv file
 write_string_to_csv(CSV_STRING)
 
 print("Finished.")
