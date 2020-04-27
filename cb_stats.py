@@ -116,7 +116,7 @@ SHIP_INDEX_TABLE = {
     'Manfred von Richthofen': 45,
     'Audacious': 46,
 }
-CSV_STRING = "Date,Session,Clan,Rating,Opponent,#,Map,Notes,Ya,Sk,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Pp,Mk,St,Wo,Nv,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,Hd,Sd,YY,Hk,Md,FR,MR,Au,X,,0,Points\n"
+CSV_STRING = "Date,Session,Clan,Rating,Opponent,#,Map,Players,Notes,Ya,Sk,Mo,Oh,Kr,GK,Co,Th,Re,Bo,Za,DM,Sa,Hi,Go,He,Ve,Yo,PR,Pp,Mk,St,Wo,Nv,Sm,Mi,Co,Sh,Hg,Hy,Ge,So,Gr,Kh,52,Da,Kl,Ma,PE,Hd,Sd,YY,Hk,Md,FR,MR,Au,X,,0,Points\n"
 
 
 #########################      functions      ############################################
@@ -226,6 +226,11 @@ def translate_battle_data(battle, csv_string):
     elif own_clan_rating == 2:
         own_clan_rating = 'B'
 
+    # create player string
+    player_string = ''
+    for player in battle['teams'][0]['players']:
+        player_string += f"{player['name']} "
+
     # create list of zeros to help track counts. 
     ship_counts = []
     for k in range(len(SHIP_INDEX_TABLE)):
@@ -249,7 +254,7 @@ def translate_battle_data(battle, csv_string):
             ship_counts[x] = ''
 
     # add battle as line in csv string
-    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},(formula),{map_name},script,"
+    csv_string += f"{date_time},{SESSION_IDS[date_time]},{own_clan_tag},{own_clan_rating},{opponent_tag},(formula),{map_name},{player_string},script,"
     for ship in ship_counts:
             csv_string += f'{ship},'
     csv_string += f",,{result},{rating_delta}\n"
